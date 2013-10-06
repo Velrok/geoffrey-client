@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [digest "1.4.3"]
                  [me.raynes/fs "1.4.4"]
+                 [org.clojure/tools.logging "0.2.6"]
                  [environ "0.4.0"]
                  [clj-http "0.7.7"]
                  [org.clojure/data.json "0.2.3"]

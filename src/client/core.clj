@@ -1,6 +1,7 @@
 (ns client.core
   (:require [clojure.string :as string]
             [digest :as digest]
+            [clojure.tools.logging :as log]
             [clojure.java.io :as io]
             [clojure.data.json :as json]
             [clojure.core.async :refer :all]
@@ -71,6 +72,8 @@
           (if (not (= @last-value
                       current-value))
             (do
+              (log/info "Change detected. New value: "
+                        (str current-value))
               (>! out current-value)
               (reset! last-value current-value))))))))
 
@@ -84,18 +87,18 @@
                  geoffrey-client-name
                  "/shows")
         json-data (json/write-str shows-data)]
-    (println "uploading to " url)
-    (println "data" json-data)
+    (log/info "uploadin shows to" url)
+    (log/info "show data" json-data)
     (try
       (http/put url
                 {:content-type :json
                   :form-params json-data})
       (catch java.net.ConnectException e
-        (println "ERROR: upload failed: " (.getMessage e)))
+        (log/error e "uploading shows failed"))
       (catch org.apache.http.NoHttpResponseException e
-        (println "ERROR: upload failed: " (.getMessage e)))
+        (log/error e "uploading shows failed"))
       (catch clojure.lang.ExceptionInfo e
-        (println "ERROR: upload failed: " (.getMessage e))))))
+        (log/error e "uploading shows failed")))))
 
 (defn -main [& args]
   (let [geoffrey-server-address (env :geoffrey-server "http://localhost:3000")
@@ -106,6 +109,9 @@
         shows-data              (chan)
         shows-data-changes      (chan)]
     (reset! running true)
+    (log/info "starting as " geoffrey-client-name
+              " connecting to server " geoffrey-server-address
+              " watching folder " shows-dir)
     (watch-shows-folder! shows-dir shows-data 3000)
     (on-change-trigger shows-data shows-data-changes)
     (while @running

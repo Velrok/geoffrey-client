@@ -3,4 +3,7 @@ pom.xml
 /lib/
 /classes/
 /targets/
+/target/
+.nrepl-port
+.lein-repl-history
 .lein-deps-sum
